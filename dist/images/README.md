@@ -47,3 +47,4 @@ import walnutPlate from '@/assets/images/walnut-plate.jpg';
 - **產品圖片、大量靜態資源** → 使用 `public/images/`
 - **需要優化的小圖片、Logo** → 使用 `src/assets/images/`
 
+
