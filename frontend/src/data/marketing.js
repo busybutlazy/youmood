@@ -8,7 +8,7 @@ export const heroSlides = [
     title: "手作木器",
     description: "每一件木製品都承載著時間的痕跡與匠人的溫度",
     image:
-      "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=1600&q=80",
+      "/images/hero-1.jpg",
     cta: { label: "探索更多", to: "/products" },
   },
   {
@@ -17,7 +17,7 @@ export const heroSlides = [
     title: "拼布創作",
     description: "一針一線編織生活的色彩與溫暖",
     image:
-      "https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=1600&q=80",
+      "/images/hero-2.jpg",
     cta: { label: "探索更多", to: "/products" },
   },
   {
@@ -26,7 +26,7 @@ export const heroSlides = [
     title: "以自然為靈感",
     description: "為生活注入手作的溫度",
     image:
-      "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?auto=format&fit=crop&w=1600&q=80",
+      "/images/hero-3.jpg",
     cta: { label: "探索更多", to: "/products" },
   },
 ];
@@ -60,7 +60,7 @@ export const brandIntro = {
   ],
   cta: { label: "了解更多", to: "/about" },
   image:
-    "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=80",
+    "/images/brand-intro.jpg",
 };
 
 // 關於頁面內容
@@ -68,7 +68,7 @@ export const aboutContent = {
   hero: {
     title: "以自然為靈感，用雙手創造溫暖",
     image:
-      "https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?auto=format&fit=crop&w=1600&q=80",
+      "/images/about-hero.jpg",
   },
   story: {
     title: "我們的故事",
@@ -77,7 +77,7 @@ export const aboutContent = {
       "一直以來喜歡木頭的紋路、溫度和香氣，將自然界最真實的禮物，融入生活是游木的理念。希望您在使用或欣賞作品時，能感受到自然的陪伴。",
     ],
     image:
-      "https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=1200&q=80",
+      "/images/about-story.jpg",
   },
   values: {
     title: "我們的理念",
