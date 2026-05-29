@@ -36,6 +36,8 @@ export default function ProductDetail() {
     };
   }, [id]);
 
+  const soldOut = product?.stock === 0;
+
   const handleAdd = () => {
     addItem(product, qty);
     showToast(`已將「${product.name}」加入購物車`);
@@ -142,19 +144,26 @@ export default function ProductDetail() {
             </p>
           )}
 
-          <div className="mt-8 flex items-center gap-4">
-            <span className="text-sm font-medium text-foreground">數量</span>
-            <QuantityStepper value={qty} onChange={setQty} />
-          </div>
-
-          <button
-            type="button"
-            onClick={handleAdd}
-            className="mt-8 inline-flex items-center justify-center gap-2 rounded-md bg-wood px-8 py-4 text-base font-medium text-primary-foreground transition-colors hover:bg-wood/90"
-          >
-            <ShoppingBag className="h-5 w-5" />
-            加入購物車
-          </button>
+          {soldOut ? (
+            <div className="mt-8 inline-flex items-center gap-2 rounded-md bg-muted px-6 py-3 text-sm font-medium text-muted-foreground">
+              此商品已售完，敬請期待補貨
+            </div>
+          ) : (
+            <>
+              <div className="mt-8 flex items-center gap-4">
+                <span className="text-sm font-medium text-foreground">數量</span>
+                <QuantityStepper value={qty} onChange={setQty} />
+              </div>
+              <button
+                type="button"
+                onClick={handleAdd}
+                className="mt-8 inline-flex items-center justify-center gap-2 rounded-md bg-wood px-8 py-4 text-base font-medium text-primary-foreground transition-colors hover:bg-wood/90"
+              >
+                <ShoppingBag className="h-5 w-5" />
+                加入購物車
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

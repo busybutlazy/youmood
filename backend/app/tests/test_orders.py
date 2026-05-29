@@ -212,6 +212,30 @@ async def test_update_status_requires_auth():
 
 
 @pytest.mark.asyncio
+async def test_get_order_public():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+        token = await get_token(c)
+        prod_id = await create_product(c, token, price=800.0)
+        order_id = (await c.post("/api/orders", json={**ORDER_BASE, "items": [{"product_id": prod_id, "quantity": 2}]})).json()["id"]
+        resp = await c.get(f"/api/orders/{order_id}/public")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["id"] == order_id
+    assert body["status"] == "pending"
+    assert len(body["items"]) == 1
+    assert body["items"][0]["quantity"] == 2
+    assert "customer_name" not in body
+    assert "customer_phone" not in body
+
+
+@pytest.mark.asyncio
+async def test_get_order_public_not_found():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+        resp = await c.get("/api/orders/999/public")
+    assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
 async def test_cancel_from_any_status():
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
         token = await get_token(c)

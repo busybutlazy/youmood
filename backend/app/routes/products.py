@@ -13,6 +13,7 @@ class ProductCreate(BaseModel):
     price: float
     category_id: int | None = None
     is_available: bool = True
+    stock: int | None = None
 
 
 class ProductUpdate(BaseModel):
@@ -21,6 +22,7 @@ class ProductUpdate(BaseModel):
     price: float | None = None
     category_id: int | None = None
     is_available: bool | None = None
+    stock: int | None = None
 
 
 def _build_product(row, images: list, request: Request) -> dict:
@@ -33,6 +35,7 @@ def _build_product(row, images: list, request: Request) -> dict:
         "category_id": row["category_id"],
         "category_name": row["category_name"],
         "is_available": bool(row["is_available"]),
+        "stock": row["stock"],
         "images": [
             {
                 "id": img["id"],
@@ -64,7 +67,7 @@ def list_products(
     where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
     sql = f"""
         SELECT p.id, p.name, p.description, p.price, p.category_id,
-               c.name AS category_name, p.is_available, p.created_at
+               c.name AS category_name, p.is_available, p.stock, p.created_at
         FROM products p
         LEFT JOIN categories c ON c.id = p.category_id
         {where}
@@ -89,7 +92,7 @@ def get_product(product_id: int, request: Request):
         row = conn.execute(
             """
             SELECT p.id, p.name, p.description, p.price, p.category_id,
-                   c.name AS category_name, p.is_available, p.created_at
+                   c.name AS category_name, p.is_available, p.stock, p.created_at
             FROM products p
             LEFT JOIN categories c ON c.id = p.category_id
             WHERE p.id = ?
@@ -121,14 +124,14 @@ def create_product(
                 raise HTTPException(status_code=404, detail="Category not found")
 
         cur = conn.execute(
-            "INSERT INTO products (name, description, price, category_id, is_available) "
-            "VALUES (?, ?, ?, ?, ?)",
-            (body.name, body.description, body.price, body.category_id, int(body.is_available)),
+            "INSERT INTO products (name, description, price, category_id, is_available, stock) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (body.name, body.description, body.price, body.category_id, int(body.is_available), body.stock),
         )
         row = conn.execute(
             """
             SELECT p.id, p.name, p.description, p.price, p.category_id,
-                   c.name AS category_name, p.is_available, p.created_at
+                   c.name AS category_name, p.is_available, p.stock, p.created_at
             FROM products p LEFT JOIN categories c ON c.id = p.category_id
             WHERE p.id = ?
             """,
@@ -167,6 +170,8 @@ def update_product(
             fields.append(("category_id", body.category_id))
         if body.is_available is not None:
             fields.append(("is_available", int(body.is_available)))
+        if "stock" in body.model_fields_set:
+            fields.append(("stock", body.stock))
 
         if fields:
             set_clause = ", ".join(f"{col} = ?" for col, _ in fields)
@@ -179,7 +184,7 @@ def update_product(
         row = conn.execute(
             """
             SELECT p.id, p.name, p.description, p.price, p.category_id,
-                   c.name AS category_name, p.is_available, p.created_at
+                   c.name AS category_name, p.is_available, p.stock, p.created_at
             FROM products p LEFT JOIN categories c ON c.id = p.category_id
             WHERE p.id = ?
             """,

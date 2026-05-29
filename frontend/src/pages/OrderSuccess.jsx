@@ -28,6 +28,9 @@ export default function OrderSuccess() {
       <p className="mt-3 text-muted-foreground">
         我們已收到您的訂單，將盡快與您聯繫確認。
       </p>
+      <p className="mt-1 text-sm text-muted-foreground">
+        通常 2–5 個工作天內出貨，我們將以電話或 Email 與您確認出貨時間。
+      </p>
 
       <p className="mt-6 inline-flex items-center gap-2 rounded-full bg-secondary px-5 py-2 text-sm">
         <span className="text-muted-foreground">訂單編號</span>
