@@ -1,0 +1,10 @@
+services:
+  test-backend:
+    build:
+      context: ./backend
+    volumes:
+      - ./backend/app:/app/app
+    environment:
+      - DATA_DIR=/tmp/test_data
+      - SECRET_KEY=test-secret-key
+    command: pytest app/tests/ -v
