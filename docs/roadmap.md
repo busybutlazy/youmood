@@ -235,6 +235,124 @@ M（樂觀 5 天 / 現實 7 天）
 
 ---
 
+## P9: frontend-ux
+
+### 目標
+補完前台購物體驗的缺口，降低使用者流失。
+
+### 對應需求 / 前置 phase
+- 需求：完整的前台使用者旅程
+- 前置：P6（前台基礎功能已完成）
+
+### 範圍
+- 商品關鍵字搜尋（前台商品列表可用關鍵字過濾）
+- 訂單狀態查詢頁（`/orders/{id}`，客戶填訂單編號查進度）
+- 空狀態畫面（購物車空、搜尋無結果、商品列表空）
+- 商品無庫存（`stock` 欄位為 0 時）顯示「已售完」並禁止加入購物車
+- 下單成功頁（`/order-success`，顯示訂單編號與預估出貨說明）
+
+### 完成判準
+- 前台輸入關鍵字能即時篩選商品
+- 客戶可用訂單編號查到自己的訂單狀態
+- 購物車為空時有引導文案與 CTA
+- 下單後導向成功頁，顯示訂單編號
+
+### 規模
+M（樂觀 3 天 / 現實 5 天）
+
+---
+
+## P10: admin-enhancement
+
+### 目標
+強化後台管理能力，讓店主日常營運更有效率。
+
+### 對應需求 / 前置 phase
+- 需求：後台可視化營運狀況、商品庫存管理
+- 前置：P7（後台基礎功能已完成）
+
+### 範圍
+- 儀表板首頁（本月訂單數、營收、待處理訂單數、熱銷商品 TOP5）
+- 商品新增/編輯加入 `stock`（庫存數量）欄位
+- 訂單列表可依狀態篩選 + 關鍵字搜尋（客戶姓名 / email）
+- 後台路由更新：`/admin` index 導向 `/admin/dashboard`
+
+### 完成判準
+- 進入後台首頁可看到當月營收與待處理訂單數
+- 可對商品設定庫存數量，前台自動反映「已售完」
+- 訂單列表可用狀態 tab 篩選
+
+### 風險
+- `stock` 欄位需 DB migration（新增 column with default）
+  - Mitigation: `ALTER TABLE products ADD COLUMN stock INTEGER NOT NULL DEFAULT 0`，加 pytest 驗證
+
+### 規模
+M（樂觀 3 天 / 現實 5 天）
+
+---
+
+## P11: seo-meta
+
+### 目標
+改善搜尋引擎能見度與社群分享預覽。
+
+### 對應需求 / 前置 phase
+- 需求：Google 搜尋排名、LINE / IG 分享時有圖卡
+- 前置：P9（前台路由穩定後再做）
+
+### 範圍
+- `index.html` 補全 `<meta>` 基礎標籤（description、keywords）
+- Open Graph tags（`og:title`、`og:description`、`og:image`、`og:url`）
+- Twitter Card tags
+- 商品頁動態 meta（`react-helmet-async` 或手動操作 document.title）
+- `public/sitemap.xml`（靜態，列出主要路由）
+- `public/robots.txt`
+
+### 完成判準
+- [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) 顯示正確圖卡
+- `curl https://www.youmood.shop` 回傳的 HTML 含 og:image
+- robots.txt 可正常存取
+
+### 風險
+- SPA 的 og tags 需在 SSR 或 nginx 層處理才能被爬蟲讀到
+  - Mitigation: 靜態首頁與關於頁寫死在 `index.html`；商品頁 og 先跳過（爬蟲讀不到動態插入的 meta）
+
+### 規模
+S（樂觀 1 天 / 現實 2 天）
+
+---
+
+## P12: production-hardening
+
+### 目標
+讓生產環境更穩定、可觀察、易維護。
+
+### 對應需求 / 前置 phase
+- 需求：服務不因意外重啟而丟資料，問題發生時能快速診斷
+- 前置：P8（安全基礎已完成）
+
+### 範圍
+- Docker Compose `healthcheck`（backend + frontend）
+- `restart: unless-stopped` 已存在；補 `deploy.resources.limits` 防 OOM
+- SQLite WAL 模式開啟（`PRAGMA journal_mode=WAL`）
+- 自動備份腳本（`/data/db/youmood.db` 每日 cron 備份到 `/data/backups/`，保留 7 天）
+- Nginx access log 導向 stdout（Docker logs 可查）
+- `.env.example` 補齊所有可配置項目說明
+
+### 完成判準
+- `docker compose ps` 顯示 backend / frontend health: healthy
+- `docker exec` 可確認 WAL 模式已開啟
+- 備份腳本手動執行後 `/data/backups/` 有 `.db` 備份檔
+
+### 風險
+- WAL 模式在 container 重啟後是否保持？
+  - Mitigation: WAL 設定存在 DB 檔案本身，重啟不會重置；加 pytest 驗證啟動後 journal_mode 值
+
+### 規模
+S（樂觀 2 天 / 現實 2 天）
+
+---
+
 ## Timeline
 
 | 樂觀 | 現實 |
