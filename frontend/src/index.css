@@ -1,0 +1,68 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Zen+Maru+Gothic:wght@300;400;500;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 33% 98%; /* 奶白 cream */
+    --foreground: 25 20% 20%; /* 深棕 */
+
+    --card: 40 33% 98%;
+    --card-foreground: 25 20% 20%;
+
+    --primary: 25 35% 35%; /* 木質棕 --wood */
+    --primary-foreground: 40 33% 98%;
+
+    --secondary: 35 30% 90%; /* 淺米 */
+    --secondary-foreground: 25 20% 20%;
+
+    --accent: 140 30% 35%; /* 森林綠 --forest */
+    --accent-foreground: 40 33% 98%;
+
+    --muted: 35 20% 92%;
+    --muted-foreground: 25 15% 45%;
+
+    --border: 35 20% 85%;
+    --input: 35 20% 85%;
+    --ring: 25 35% 35%;
+
+    --radius: 0.5rem;
+
+    /* 品牌擴充 token */
+    --wood: 25 35% 35%;
+    --wood-light: 30 30% 70%;
+    --forest: 140 30% 35%;
+    --forest-light: 140 25% 85%;
+    --cream: 40 33% 98%;
+    --sage: 120 15% 60%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    @apply font-serif;
+  }
+}
+
+@layer utilities {
+  /* 隱藏縮圖列 / 分類 tabs 的捲軸 */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
