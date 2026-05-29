@@ -145,7 +145,7 @@ __pycache__/
 .pytest_cache/
 
 # Docker volume data (runtime, not committed)
-data/
+/data/
 
 # Environment
 .env
