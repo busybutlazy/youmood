@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app import db, seed
-from app.routes import auth, categories, images, products
+from app.routes import auth, categories, images, orders, products
 
 
 @asynccontextmanager
@@ -18,6 +18,7 @@ app.include_router(auth.router)
 app.include_router(categories.router)
 app.include_router(products.router)
 app.include_router(images.router)
+app.include_router(orders.router)
 
 
 @app.get("/api/health")
