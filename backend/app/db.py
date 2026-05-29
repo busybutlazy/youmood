@@ -3,71 +3,26 @@ from contextlib import contextmanager
 from pathlib import Path
 import os
 
+from alembic.config import Config
+from alembic.command import upgrade as alembic_upgrade
+
 DATA_DIR = Path(os.environ.get("DATA_DIR", "./data"))
 DB_PATH = DATA_DIR / "db" / "youmood.db"
 IMAGES_DIR = DATA_DIR / "images" / "products"
 
-DDL = """
-CREATE TABLE IF NOT EXISTS categories (
-    id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    name       TEXT    NOT NULL UNIQUE,
-    sort_order INTEGER NOT NULL DEFAULT 0
-);
-
-CREATE TABLE IF NOT EXISTS products (
-    id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    name         TEXT    NOT NULL,
-    description  TEXT,
-    price        REAL    NOT NULL,
-    category_id  INTEGER REFERENCES categories(id) ON DELETE SET NULL,
-    is_available INTEGER NOT NULL DEFAULT 1,
-    created_at   TEXT    NOT NULL DEFAULT (datetime('now')),
-    updated_at   TEXT    NOT NULL DEFAULT (datetime('now'))
-);
-
-CREATE TABLE IF NOT EXISTS product_images (
-    id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    path       TEXT    NOT NULL,
-    is_primary INTEGER NOT NULL DEFAULT 0,
-    sort_order INTEGER NOT NULL DEFAULT 0
-);
-
-CREATE TABLE IF NOT EXISTS admin_users (
-    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    username      TEXT NOT NULL UNIQUE,
-    password_hash TEXT NOT NULL,
-    created_at    TEXT NOT NULL DEFAULT (datetime('now'))
-);
-
-CREATE TABLE IF NOT EXISTS orders (
-    id               INTEGER PRIMARY KEY AUTOINCREMENT,
-    customer_name    TEXT NOT NULL,
-    customer_phone   TEXT NOT NULL,
-    customer_email   TEXT,
-    customer_address TEXT,
-    notes            TEXT,
-    status           TEXT NOT NULL DEFAULT 'pending',
-    created_at       TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at       TEXT NOT NULL DEFAULT (datetime('now'))
-);
-
-CREATE TABLE IF NOT EXISTS order_items (
-    id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    order_id   INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-    product_id INTEGER NOT NULL REFERENCES products(id),
-    quantity   INTEGER NOT NULL DEFAULT 1,
-    unit_price REAL    NOT NULL
-);
-"""
+ALEMBIC_INI = Path(__file__).parent.parent / "alembic.ini"
 
 
-def init():
+def run_migrations() -> None:
+    cfg = Config(str(ALEMBIC_INI))
+    cfg.set_main_option("sqlalchemy.url", f"sqlite:///{DB_PATH}")
+    alembic_upgrade(cfg, "head")
+
+
+def init() -> None:
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     IMAGES_DIR.mkdir(parents=True, exist_ok=True)
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.executescript(DDL)
-        conn.execute("PRAGMA foreign_keys = ON")
+    run_migrations()
 
 
 @contextmanager
