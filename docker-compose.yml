@@ -10,6 +10,8 @@ services:
     environment:
       - DATA_DIR=/data
       - SECRET_KEY=${SECRET_KEY:-dev-secret-change-in-prod}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-changeme}
     restart: unless-stopped
 
   frontend:

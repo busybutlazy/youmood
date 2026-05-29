@@ -7,4 +7,6 @@ services:
     environment:
       - DATA_DIR=/tmp/test_data
       - SECRET_KEY=test-secret-key
+      - ADMIN_USERNAME=testadmin
+      - ADMIN_PASSWORD=testpass123
     command: pytest app/tests/ -v
