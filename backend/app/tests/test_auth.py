@@ -1,24 +1,9 @@
 import pytest
 from httpx import AsyncClient, ASGITransport
 
-from app import db, seed
 from app.main import app
 
 CREDS = {"username": "testadmin", "password": "testpass123"}
-
-
-@pytest.fixture(autouse=True)
-def isolated_db(tmp_path, monkeypatch):
-    from app.deps import pwd_context
-    monkeypatch.setattr(db, "DB_PATH", tmp_path / "db" / "youmood.db")
-    monkeypatch.setattr(db, "IMAGES_DIR", tmp_path / "images" / "products")
-    # ASGITransport 不觸發 lifespan，直接在 fixture 初始化
-    db.init()
-    with db.get_conn() as conn:
-        conn.execute(
-            "INSERT INTO admin_users (username, password_hash) VALUES (?, ?)",
-            ("testadmin", pwd_context.hash("testpass123")),
-        )
 
 
 @pytest.mark.asyncio
