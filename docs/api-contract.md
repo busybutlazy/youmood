@@ -59,6 +59,22 @@ response:
 | PATCH | `/api/categories/{id}` | 管理員 | 更新名稱或排序 |
 | DELETE | `/api/categories/{id}` | 管理員 | 刪除分類（products.category_id SET NULL） |
 
+**GET /api/categories** response:
+```json
+[
+  { "id": 1, "name": "木製品", "sort_order": 0 },
+  { "id": 2, "name": "拼布", "sort_order": 1 }
+]
+```
+
+**POST /api/categories** request / response（單筆）:
+```json
+{ "name": "木製品", "sort_order": 0 }
+```
+```json
+{ "id": 1, "name": "木製品", "sort_order": 0 }
+```
+
 ---
 
 ### Products
@@ -87,6 +103,10 @@ response:
   "created_at": "2026-05-29T00:00:00"
 }
 ```
+
+---
+
+**GET /api/products/{id}** response（同 GET /api/products 單項，多一層確認存在）
 
 ---
 
@@ -124,10 +144,40 @@ response:
 }
 ```
 
+**POST /api/orders / GET /api/orders/{id}** response:
+```json
+{
+  "id": 1,
+  "customer_name": "王小明",
+  "customer_phone": "0912345678",
+  "customer_email": "user@example.com",
+  "customer_address": "台北市中正區",
+  "notes": "請小心包裝",
+  "status": "pending",
+  "created_at": "2026-05-29T00:00:00",
+  "updated_at": "2026-05-29T00:00:00",
+  "items": [
+    {
+      "id": 1,
+      "product_id": 1,
+      "product_name": "胡桃木餐盤",
+      "quantity": 2,
+      "unit_price": 1280.0
+    }
+  ]
+}
+```
+
+訂單狀態值：`pending` | `confirmed` | `shipped` | `done` | `cancelled`
+
+**GET /api/orders** response：同上格式的陣列，依 id 降冪排列。
+
 **PATCH /api/orders/{id}/status** request:
 ```json
 { "status": "confirmed" }
 ```
+
+response：更新後的完整訂單物件（同 GET /api/orders/{id}）。
 
 ---
 
