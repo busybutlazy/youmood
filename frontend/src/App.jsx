@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound";
 import AdminLayout from "./admin/components/AdminLayout";
 import RequireAdmin from "./admin/components/RequireAdmin";
 import Login from "./admin/pages/Login";
+import Dashboard from "./admin/pages/Dashboard";
 import AdminProducts from "./admin/pages/Products";
 import ProductForm from "./admin/pages/ProductForm";
 import Categories from "./admin/pages/Categories";
@@ -50,7 +51,8 @@ export default function App() {
                 </RequireAdmin>
               }
             >
-              <Route index element={<Navigate to="/admin/products" replace />} />
+              <Route index element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="dashboard" element={<Dashboard />} />
               <Route path="products" element={<AdminProducts />} />
               <Route path="products/new" element={<ProductForm />} />
               <Route path="products/:id/edit" element={<ProductForm />} />

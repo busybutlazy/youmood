@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Search } from "lucide-react";
 import { listOrders, updateOrderStatus } from "../../api/admin.js";
 
 const STATUSES = [
@@ -32,6 +32,7 @@ const NEXT_STATUSES = {
 export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [filter, setFilter] = useState("");
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState(null);
@@ -39,13 +40,13 @@ export default function Orders() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      setOrders(await listOrders(filter));
+      setOrders(await listOrders({ status: filter, search }));
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [filter]);
+  }, [filter, search]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -71,21 +72,33 @@ export default function Orders() {
         </div>
       )}
 
-      {/* Status filter tabs */}
-      <div className="flex gap-1 mb-6 flex-wrap">
-        {STATUSES.map((s) => (
-          <button
-            key={s.value}
-            onClick={() => setFilter(s.value)}
-            className={`rounded-full px-3 py-1 text-sm transition-colors ${
-              filter === s.value
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-secondary"
-            }`}
-          >
-            {s.label}
-          </button>
-        ))}
+      {/* Filters */}
+      <div className="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center">
+        <div className="flex gap-1 flex-wrap">
+          {STATUSES.map((s) => (
+            <button
+              key={s.value}
+              onClick={() => setFilter(s.value)}
+              className={`rounded-full px-3 py-1 text-sm transition-colors ${
+                filter === s.value
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-secondary"
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+        <div className="relative sm:ml-auto sm:w-56">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="搜尋姓名 / Email"
+            className="h-9 w-full rounded-md border border-input bg-background pl-8 pr-3 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20"
+          />
+        </div>
       </div>
 
       {loading && <p className="text-muted-foreground">載入中…</p>}

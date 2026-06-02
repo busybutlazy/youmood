@@ -9,7 +9,7 @@ import {
 } from "../../api/admin.js";
 
 const EMPTY_FORM = {
-  name: "", description: "", price: "", category_id: "", is_available: true,
+  name: "", description: "", price: "", category_id: "", is_available: true, stock: "",
 };
 
 export default function ProductForm() {
@@ -39,6 +39,7 @@ export default function ProductForm() {
             price: String(p.price),
             category_id: p.category_id ? String(p.category_id) : "",
             is_available: p.is_available,
+            stock: p.stock == null ? "" : String(p.stock),
           });
           setImages(p.images);
         })
@@ -64,6 +65,7 @@ export default function ProductForm() {
       price: Number(form.price),
       category_id: form.category_id ? Number(form.category_id) : null,
       is_available: form.is_available,
+      stock: form.stock === "" ? null : Number(form.stock),
     };
     try {
       if (isEdit) {
@@ -166,17 +168,30 @@ export default function ProductForm() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">分類</label>
-            <select
-              value={form.category_id} onChange={set("category_id")}
-              className="w-full rounded-md border border-input px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-background"
-            >
-              <option value="">— 無分類 —</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
+            <label className="block text-sm font-medium mb-1">
+              庫存數量
+              <span className="ml-1 text-xs font-normal text-muted-foreground">（空白＝不限）</span>
+            </label>
+            <input
+              type="number" min="0" step="1"
+              value={form.stock} onChange={set("stock")}
+              placeholder="不追蹤庫存"
+              className="w-full rounded-md border border-input px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            />
           </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">分類</label>
+          <select
+            value={form.category_id} onChange={set("category_id")}
+            className="w-full rounded-md border border-input px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-background"
+          >
+            <option value="">— 無分類 —</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
         </div>
 
         <label className="flex items-center gap-2 text-sm cursor-pointer select-none">

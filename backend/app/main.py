@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app import db, seed
 from app.config import ALLOWED_ORIGINS
-from app.routes import auth, categories, images, orders, products
+from app.routes import auth, categories, images, orders, products, stats
 
 
 @asynccontextmanager
@@ -29,6 +29,7 @@ app.include_router(categories.router)
 app.include_router(products.router)
 app.include_router(images.router)
 app.include_router(orders.router)
+app.include_router(stats.router)
 
 
 @app.get("/api/health")

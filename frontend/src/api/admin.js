@@ -60,11 +60,19 @@ export const setPrimaryImage = (productId, imageId) =>
   });
 
 // ── Orders ─────────────────────────────────────────────────
-export const listOrders = (status) =>
-  authed(`/orders${status ? `?status=${status}` : ""}`);
+export const listOrders = ({ status, search } = {}) => {
+  const params = new URLSearchParams();
+  if (status) params.set("status", status);
+  if (search) params.set("search", search);
+  const qs = params.toString();
+  return authed(`/orders${qs ? `?${qs}` : ""}`);
+};
 
 export const updateOrderStatus = (id, status) =>
   authed(`/orders/${id}/status`, {
     method: "PATCH",
     body: JSON.stringify({ status }),
   });
+
+// ── Stats ──────────────────────────────────────────────────
+export const getStats = () => authed("/admin/stats");

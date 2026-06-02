@@ -1,8 +1,9 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutGrid, Tag, ShoppingBag, LogOut } from "lucide-react";
+import { LayoutDashboard, LayoutGrid, Tag, ShoppingBag, LogOut } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 
 const NAV = [
+  { to: "/admin/dashboard", icon: LayoutDashboard, label: "儀表板" },
   { to: "/admin/products", icon: LayoutGrid, label: "商品管理" },
   { to: "/admin/categories", icon: Tag, label: "分類管理" },
   { to: "/admin/orders", icon: ShoppingBag, label: "訂單管理" },
