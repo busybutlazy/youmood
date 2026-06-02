@@ -18,10 +18,12 @@ export default function HeroCarousel({ slides = heroSlides, onEditSlide }) {
     [count]
   );
 
+  // Pause auto-advance while the edit modal is open
   useEffect(() => {
+    if (editingIndex !== null) return;
     const timer = setInterval(() => go(index + 1), 6000);
     return () => clearInterval(timer);
-  }, [index, go]);
+  }, [index, go, editingIndex]);
 
   return (
     <section className="relative h-[72vh] min-h-[460px] w-full overflow-hidden bg-foreground">
@@ -61,14 +63,14 @@ export default function HeroCarousel({ slides = heroSlides, onEditSlide }) {
             </div>
           </div>
 
-          {/* Admin edit button — only on the active slide */}
+          {/* Admin edit button — always visible on the active slide */}
           {isAdmin && onEditSlide && i === index && (
             <button
               onClick={() => setEditingIndex(i)}
-              className="absolute right-16 top-4 z-20 flex items-center gap-1.5 rounded-full bg-wood/90 px-3 py-1.5 text-xs font-medium text-white shadow-md backdrop-blur hover:bg-wood"
+              className="absolute bottom-14 right-6 z-20 flex items-center gap-1.5 rounded-full bg-wood px-4 py-2 text-sm font-medium text-white shadow-lg ring-2 ring-white/30 hover:bg-wood/90"
             >
-              <Pencil className="h-3 w-3" />
-              編輯此張
+              <Pencil className="h-3.5 w-3.5" />
+              編輯此張（文字 + 圖片）
             </button>
           )}
         </div>
