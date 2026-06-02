@@ -4,8 +4,10 @@ import { PackageOpen, Search } from "lucide-react";
 import CategoryTabs from "@/components/CategoryTabs";
 import ProductCard from "@/components/ProductCard";
 import SkeletonCard from "@/components/SkeletonCard";
+import { EditableText } from "@/components/Editable";
 import { getCategories } from "@/api/categories";
 import { getProducts } from "@/api/products";
+import { useSiteContent } from "@/hooks/useSiteContent";
 
 export default function Products() {
   const [categories, setCategories] = useState([]);
@@ -15,6 +17,10 @@ export default function Products() {
   const [error, setError] = useState(null);
   usePageTitle("全部商品");
   const [query, setQuery] = useState("");
+
+  const { content, updateText } = useSiteContent("products", {
+    subtitle: "手作的溫度，獨一無二的存在",
+  });
 
   useEffect(() => {
     getCategories()
@@ -54,7 +60,12 @@ export default function Products() {
     <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
       <header className="mb-8">
         <h1 className="text-3xl font-semibold md:text-4xl">全部商品</h1>
-        <p className="mt-2 text-muted-foreground">手作的溫度，獨一無二的存在</p>
+        <EditableText
+          value={content.subtitle}
+          onSave={(v) => updateText("subtitle", v)}
+        >
+          <p className="mt-2 text-muted-foreground">{content.subtitle}</p>
+        </EditableText>
       </header>
 
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">

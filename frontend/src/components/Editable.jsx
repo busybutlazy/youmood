@@ -5,7 +5,7 @@ import { useAdminMode } from "@/hooks/useAdminMode";
 // ── EditableText ──────────────────────────────────────────────────────────────
 // Wraps any block of content. When admin is logged in, shows a pencil button
 // on hover that opens a text/textarea edit modal.
-export function EditableText({ value, onSave, multiline = false, children }) {
+export function EditableText({ value, onSave, multiline = false, hint, children }) {
   const isAdmin = useAdminMode();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
@@ -51,6 +51,7 @@ export function EditableText({ value, onSave, multiline = false, children }) {
           saving={saving}
           error={error}
           onSave={handleSave}
+          hint={hint}
           onClose={() => setOpen(false)}
         />
       )}
@@ -58,7 +59,7 @@ export function EditableText({ value, onSave, multiline = false, children }) {
   );
 }
 
-function EditModal({ multiline, draft, onChange, saving, error, onSave, onClose }) {
+function EditModal({ multiline, draft, onChange, saving, error, hint, onSave, onClose }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
@@ -86,6 +87,7 @@ function EditModal({ multiline, draft, onChange, saving, error, onSave, onClose 
           />
         )}
 
+        {hint && <p className="mt-1.5 text-xs text-muted-foreground">{hint}</p>}
         {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
 
         <div className="mt-5 flex justify-end gap-2">

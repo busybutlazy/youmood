@@ -7,10 +7,22 @@ import ProductCard from "@/components/ProductCard";
 import SkeletonCard from "@/components/SkeletonCard";
 import { EditableText, EditableImage } from "@/components/Editable";
 import { getProducts } from "@/api/products";
-import { features, brandIntro } from "@/data/marketing";
+import { features, brandIntro, heroSlides } from "@/data/marketing";
 import { useSiteContent } from "@/hooks/useSiteContent";
 
 const featureIcons = { leaf: Leaf, hand: Hand, sparkles: Sparkles };
+
+// Build flat defaults from heroSlides for useSiteContent
+function buildHeroDefaults() {
+  const d = {};
+  heroSlides.forEach((slide, i) => {
+    d[`hero_${i}_title`] = slide.title;
+    d[`hero_${i}_subtitle`] = slide.subtitle;
+    d[`hero_${i}_description`] = slide.description;
+    d[`hero_${i}_image`] = slide.image;
+  });
+  return d;
+}
 
 export default function Home() {
   usePageTitle(null);
@@ -21,7 +33,27 @@ export default function Home() {
     hero_image: brandIntro.image,
     tagline: brandIntro.title,
     subtitle: brandIntro.paragraphs.join("\n\n"),
+    ...buildHeroDefaults(),
   });
+
+  // Build slides array for HeroCarousel
+  const slides = heroSlides.map((defaultSlide, i) => ({
+    ...defaultSlide,
+    title: content[`hero_${i}_title`] ?? defaultSlide.title,
+    subtitle: content[`hero_${i}_subtitle`] ?? defaultSlide.subtitle,
+    description: content[`hero_${i}_description`] ?? defaultSlide.description,
+    image: content[`hero_${i}_image`] ?? defaultSlide.image,
+  }));
+
+  async function editSlide(index, { subtitle, title, description, imageFile }) {
+    const p = `hero_${index}`;
+    await Promise.all([
+      updateText(`${p}_subtitle`, subtitle),
+      updateText(`${p}_title`, title),
+      updateText(`${p}_description`, description),
+    ]);
+    if (imageFile) await updateImage(`${p}_image`, imageFile);
+  }
 
   useEffect(() => {
     let active = true;
@@ -40,7 +72,7 @@ export default function Home() {
 
   return (
     <div>
-      <HeroCarousel />
+      <HeroCarousel slides={slides} onEditSlide={editSlide} />
 
       {/* 精選商品 */}
       <section className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
