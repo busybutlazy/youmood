@@ -23,6 +23,9 @@ def init() -> None:
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     IMAGES_DIR.mkdir(parents=True, exist_ok=True)
     run_migrations()
+    # WAL mode survives restarts (stored in DB file); set after every init to be safe
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("PRAGMA journal_mode=WAL")
 
 
 @contextmanager
