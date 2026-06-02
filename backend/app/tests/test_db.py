@@ -49,3 +49,10 @@ def test_alembic_version_recorded():
         row = conn.execute("SELECT version_num FROM alembic_version").fetchone()
     assert row is not None
     assert row[0] == "0002"
+
+
+def test_wal_mode_enabled():
+    db.init()
+    with sqlite3.connect(db.DB_PATH) as conn:
+        row = conn.execute("PRAGMA journal_mode").fetchone()
+    assert row[0] == "wal"
