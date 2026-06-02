@@ -3,16 +3,44 @@ import { usePageTitle } from "@/lib/usePageTitle";
 import { EditableText, EditableImage } from "@/components/Editable";
 import { useSiteContent } from "@/hooks/useSiteContent";
 
+const PIPE_HINT = "每行一項，格式：標題|說明內容";
+
+function parsePipeList(str) {
+  return str
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => {
+      const idx = line.indexOf("|");
+      if (idx === -1) return { title: line.trim(), description: "" };
+      return {
+        title: line.slice(0, idx).trim(),
+        description: line.slice(idx + 1).trim(),
+      };
+    });
+}
+
 export default function About() {
   usePageTitle("關於我們");
   const { hero, story, values, process } = aboutContent;
 
+  const defaultValues = values.items
+    .map(({ title, description }) => `${title}|${description}`)
+    .join("\n");
+
+  const defaultProcess = process.steps
+    .map(({ title, description }) => `${title}|${description}`)
+    .join("\n");
+
   const { content, updateText, updateImage } = useSiteContent("about", {
     story: story.paragraphs.join("\n\n"),
     photo: story.image,
+    values: defaultValues,
+    process: defaultProcess,
   });
 
   const storyParagraphs = (content.story || "").split("\n").filter(Boolean);
+  const valueItems = parsePipeList(content.values || defaultValues);
+  const processItems = parsePipeList(content.process || defaultProcess);
 
   return (
     <div>
@@ -65,21 +93,28 @@ export default function About() {
           <h2 className="text-center text-3xl font-semibold md:text-4xl">
             {values.title}
           </h2>
-          <div className="mt-12 grid gap-6 md:grid-cols-2">
-            {values.items.map((item) => (
-              <div
-                key={item.title}
-                className="rounded-lg border border-border bg-card p-8"
-              >
-                <h3 className="text-xl font-semibold text-wood">
-                  {item.title}
-                </h3>
-                <p className="mt-3 leading-relaxed text-muted-foreground">
-                  {item.description}
-                </p>
-              </div>
-            ))}
-          </div>
+          <EditableText
+            value={content.values}
+            onSave={(v) => updateText("values", v)}
+            multiline
+            hint={PIPE_HINT}
+          >
+            <div className="mt-12 grid gap-6 md:grid-cols-2">
+              {valueItems.map((item, i) => (
+                <div
+                  key={i}
+                  className="rounded-lg border border-border bg-card p-8"
+                >
+                  <h3 className="text-xl font-semibold text-wood">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 leading-relaxed text-muted-foreground">
+                    {item.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </EditableText>
         </div>
       </section>
 
@@ -88,19 +123,26 @@ export default function About() {
         <h2 className="text-center text-3xl font-semibold md:text-4xl">
           {process.title}
         </h2>
-        <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {process.steps.map((s) => (
-            <div key={s.step} className="text-center">
-              <span className="font-serif text-4xl font-semibold text-wood-light">
-                {s.step}
-              </span>
-              <h3 className="mt-3 text-lg font-semibold">{s.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                {s.description}
-              </p>
-            </div>
-          ))}
-        </div>
+        <EditableText
+          value={content.process}
+          onSave={(v) => updateText("process", v)}
+          multiline
+          hint={PIPE_HINT}
+        >
+          <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {processItems.map((item, i) => (
+              <div key={i} className="text-center">
+                <span className="font-serif text-4xl font-semibold text-wood-light">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <h3 className="mt-3 text-lg font-semibold">{item.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {item.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </EditableText>
       </section>
     </div>
   );

@@ -11,11 +11,33 @@ router = APIRouter(tags=["site_content"])
 
 # Allowed (page, key, type) combinations — prevents arbitrary key injection
 CONTENT_SCHEMA: dict[tuple[str, str], str] = {
+    # Home — brand intro
     ("home", "hero_image"): "image",
     ("home", "tagline"): "text",
     ("home", "subtitle"): "text",
+    # Home — hero carousel (3 slides)
+    ("home", "hero_0_title"): "text",
+    ("home", "hero_0_subtitle"): "text",
+    ("home", "hero_0_description"): "text",
+    ("home", "hero_0_image"): "image",
+    ("home", "hero_1_title"): "text",
+    ("home", "hero_1_subtitle"): "text",
+    ("home", "hero_1_description"): "text",
+    ("home", "hero_1_image"): "image",
+    ("home", "hero_2_title"): "text",
+    ("home", "hero_2_subtitle"): "text",
+    ("home", "hero_2_description"): "text",
+    ("home", "hero_2_image"): "image",
+    # Products page
+    ("products", "subtitle"): "text",
+    # About
     ("about", "story"): "text",
     ("about", "photo"): "image",
+    # About — 我們的理念（pipe-delimited: "標題|說明\n..."）
+    ("about", "values"): "text",
+    # About — 製作過程（pipe-delimited: "標題|說明\n..."）
+    ("about", "process"): "text",
+    # Contact
     ("contact", "email"): "text",
     ("contact", "instagram"): "text",
     ("contact", "hours"): "text",

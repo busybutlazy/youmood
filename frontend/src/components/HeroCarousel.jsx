@@ -1,27 +1,33 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, ImagePlus } from "lucide-react";
 import { heroSlides } from "@/data/marketing";
 import { cn } from "@/lib/utils";
+import { useAdminMode } from "@/hooks/useAdminMode";
 
-export default function HeroCarousel() {
+// slides: array of {id, subtitle, title, description, image, cta}
+// onEditSlide?: async (index, { subtitle, title, description, imageFile? }) => void
+export default function HeroCarousel({ slides = heroSlides, onEditSlide }) {
+  const isAdmin = useAdminMode();
   const [index, setIndex] = useState(0);
-  const count = heroSlides.length;
+  const [editingIndex, setEditingIndex] = useState(null);
+  const count = slides.length;
 
   const go = useCallback(
     (next) => setIndex(((next % count) + count) % count),
     [count]
   );
 
-  // 自動輪播
+  // Pause auto-advance while the edit modal is open
   useEffect(() => {
+    if (editingIndex !== null) return;
     const timer = setInterval(() => go(index + 1), 6000);
     return () => clearInterval(timer);
-  }, [index, go]);
+  }, [index, go, editingIndex]);
 
   return (
     <section className="relative h-[72vh] min-h-[460px] w-full overflow-hidden bg-foreground">
-      {heroSlides.map((slide, i) => (
+      {slides.map((slide, i) => (
         <div
           key={slide.id}
           className={cn(
@@ -56,6 +62,17 @@ export default function HeroCarousel() {
               </div>
             </div>
           </div>
+
+          {/* Admin edit button — always visible on the active slide */}
+          {isAdmin && onEditSlide && i === index && (
+            <button
+              onClick={() => setEditingIndex(i)}
+              className="absolute bottom-14 right-6 z-20 flex items-center gap-1.5 rounded-full bg-wood px-4 py-2 text-sm font-medium text-white shadow-lg ring-2 ring-white/30 hover:bg-wood/90"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+              編輯此張（文字 + 圖片）
+            </button>
+          )}
         </div>
       ))}
 
@@ -79,7 +96,7 @@ export default function HeroCarousel() {
 
       {/* 指示點 */}
       <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2">
-        {heroSlides.map((_, i) => (
+        {slides.map((_, i) => (
           <button
             key={i}
             type="button"
@@ -92,6 +109,169 @@ export default function HeroCarousel() {
           />
         ))}
       </div>
+
+      {/* Slide edit modal */}
+      {editingIndex !== null && (
+        <SlideEditModal
+          index={editingIndex}
+          slide={slides[editingIndex]}
+          onSave={async (changes) => {
+            await onEditSlide(editingIndex, changes);
+            setEditingIndex(null);
+          }}
+          onClose={() => setEditingIndex(null)}
+        />
+      )}
     </section>
+  );
+}
+
+function SlideEditModal({ index, slide, onSave, onClose }) {
+  const [draft, setDraft] = useState({
+    subtitle: slide.subtitle,
+    title: slide.title,
+    description: slide.description,
+  });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+  const fileRef = useRef(null);
+
+  function handleImageSelect(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+    e.target.value = "";
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    setError(null);
+    try {
+      await onSave({ ...draft, imageFile: imageFile ?? undefined });
+    } catch {
+      setError("儲存失敗，請稍後再試");
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl">
+        <h3 className="mb-5 text-base font-semibold">
+          編輯第 {index + 1} 張投影片
+        </h3>
+
+        <div className="space-y-4">
+          <Field label="副標題（小字）">
+            <input
+              type="text"
+              value={draft.subtitle}
+              onChange={(e) => setDraft((d) => ({ ...d, subtitle: e.target.value }))}
+              className="modal-input"
+            />
+          </Field>
+          <Field label="主標題（大字）">
+            <input
+              type="text"
+              value={draft.title}
+              onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
+              className="modal-input"
+            />
+          </Field>
+          <Field label="描述文字">
+            <textarea
+              rows={2}
+              value={draft.description}
+              onChange={(e) => setDraft((d) => ({ ...d, description: e.target.value }))}
+              className="modal-input resize-none"
+            />
+          </Field>
+          <Field label="背景圖片">
+            <div className="flex items-center gap-3">
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="preview"
+                  className="h-16 w-24 rounded object-cover"
+                />
+              ) : (
+                <img
+                  src={slide.image}
+                  alt="current"
+                  className="h-16 w-24 rounded object-cover opacity-60"
+                />
+              )}
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted"
+              >
+                <ImagePlus className="h-4 w-4" />
+                更換圖片
+              </button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageSelect}
+              />
+            </div>
+          </Field>
+        </div>
+
+        {error && <p className="mt-3 text-xs text-red-500">{error}</p>}
+
+        <div className="mt-6 flex justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="rounded-md px-4 py-2 text-sm text-muted-foreground hover:bg-muted"
+          >
+            取消
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="rounded-md bg-wood px-4 py-2 text-sm font-medium text-white hover:bg-wood/90 disabled:opacity-60"
+          >
+            {saving ? "儲存中..." : "儲存"}
+          </button>
+        </div>
+      </div>
+
+      <style>{`
+        .modal-input {
+          width: 100%;
+          border: 1px solid hsl(var(--border));
+          border-radius: calc(var(--radius) - 2px);
+          background: hsl(var(--background));
+          padding: 0.5rem 0.75rem;
+          font-size: 0.875rem;
+          color: hsl(var(--foreground));
+          outline: none;
+        }
+        .modal-input:focus {
+          border-color: hsl(var(--wood));
+          box-shadow: 0 0 0 2px hsl(var(--wood) / .15);
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function Field({ label, children }) {
+  return (
+    <div>
+      <label className="mb-1 block text-xs font-medium text-muted-foreground">
+        {label}
+      </label>
+      {children}
+    </div>
   );
 }
