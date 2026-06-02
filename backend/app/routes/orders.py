@@ -112,13 +112,25 @@ def create_order(body: OrderCreate):
 
 
 @router.get("")
-def list_orders(status: str | None = None, _: str = Depends(get_current_admin)):
+def list_orders(
+    status: str | None = None,
+    search: str | None = None,
+    _: str = Depends(get_current_admin),
+):
     if status is not None and status not in VALID_STATUSES:
         raise HTTPException(status_code=400, detail=f"Invalid status: {status}")
 
-    where = "WHERE status = ?" if status else ""
-    params = [status] if status else []
+    conditions = []
+    params: list = []
+    if status:
+        conditions.append("status = ?")
+        params.append(status)
+    if search and search.strip():
+        term = f"%{search.strip()}%"
+        conditions.append("(customer_name LIKE ? OR customer_email LIKE ?)")
+        params.extend([term, term])
 
+    where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
     with db.get_conn() as conn:
         orders = conn.execute(
             f"SELECT id, customer_name, customer_phone, customer_email, customer_address, "
