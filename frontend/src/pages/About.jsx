@@ -3,7 +3,23 @@ import { usePageTitle } from "@/lib/usePageTitle";
 import { EditableText, EditableImage } from "@/components/Editable";
 import { useSiteContent } from "@/hooks/useSiteContent";
 
-const PIPE_HINT = "每行一項，格式：標題|說明內容";
+const PIPE_HINT = "每行一項，格式：標題|說明內容（標題中不可含 | 符號）";
+
+function validatePipeList(str) {
+  const lines = str.split("\n").filter(Boolean);
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const firstPipe = line.indexOf("|");
+    if (firstPipe === -1) {
+      return `第 ${i + 1} 行缺少分隔符號（格式：標題|說明）`;
+    }
+    // Title is everything before first |; it must not itself contain |
+    if (line.slice(0, firstPipe).includes("|")) {
+      return `第 ${i + 1} 行的標題含有 | 符號，請移除`;
+    }
+  }
+  return null;
+}
 
 function parsePipeList(str) {
   return str
@@ -98,6 +114,7 @@ export default function About() {
             onSave={(v) => updateText("values", v)}
             multiline
             hint={PIPE_HINT}
+            validate={validatePipeList}
           >
             <div className="mt-12 grid gap-6 md:grid-cols-2">
               {valueItems.map((item, i) => (
@@ -128,6 +145,7 @@ export default function About() {
           onSave={(v) => updateText("process", v)}
           multiline
           hint={PIPE_HINT}
+          validate={validatePipeList}
         >
           <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {processItems.map((item, i) => (

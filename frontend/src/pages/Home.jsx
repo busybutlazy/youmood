@@ -29,7 +29,7 @@ export default function Home() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const { content, updateText, updateImage } = useSiteContent("home", {
+  const { content, updateText, updateTextBatch, updateImage } = useSiteContent("home", {
     hero_image: brandIntro.image,
     tagline: brandIntro.title,
     subtitle: brandIntro.paragraphs.join("\n\n"),
@@ -47,11 +47,11 @@ export default function Home() {
 
   async function editSlide(index, { subtitle, title, description, imageFile }) {
     const p = `hero_${index}`;
-    await Promise.all([
-      updateText(`${p}_subtitle`, subtitle),
-      updateText(`${p}_title`, title),
-      updateText(`${p}_description`, description),
-    ]);
+    await updateTextBatch({
+      [`${p}_subtitle`]: subtitle,
+      [`${p}_title`]: title,
+      [`${p}_description`]: description,
+    });
     if (imageFile) await updateImage(`${p}_image`, imageFile);
   }
 

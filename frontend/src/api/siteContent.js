@@ -19,6 +19,20 @@ export async function saveText(page, key, value) {
   return res.json();
 }
 
+// items: [{ page, key, value }, ...]  — all saved in one DB transaction
+export async function saveTextBatch(items) {
+  const res = await fetch("/api/admin/site-content/batch", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getToken()}`,
+    },
+    body: JSON.stringify(items),
+  });
+  if (!res.ok) throw new Error("儲存失敗");
+  return res.json();
+}
+
 export async function uploadSiteImage(page, key, file) {
   const form = new FormData();
   form.append("file", file);

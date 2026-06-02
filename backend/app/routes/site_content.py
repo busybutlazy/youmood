@@ -122,6 +122,26 @@ def update_content(body: ContentUpdate, _: str = Depends(get_current_admin)):
     return {"page": body.page, "key": body.key, "value": body.value}
 
 
+# ── Admin: batch update text fields (single transaction) ─────────────────────
+
+@router.put("/api/admin/site-content/batch", status_code=status.HTTP_200_OK)
+def update_content_batch(items: list[ContentUpdate], _: str = Depends(get_current_admin)):
+    for item in items:
+        if (item.page, item.key) not in CONTENT_SCHEMA:
+            raise HTTPException(status_code=404, detail=f"Content key not found: {item.page}/{item.key}")
+        if CONTENT_SCHEMA[(item.page, item.key)] != "text":
+            raise HTTPException(status_code=400, detail=f"Field '{item.key}' is not a text field")
+
+    with db.get_conn() as conn:
+        for item in items:
+            conn.execute(
+                "INSERT INTO site_content (page, key, type, value) VALUES (?, ?, 'text', ?)"
+                " ON CONFLICT(page, key) DO UPDATE SET value = excluded.value",
+                (item.page, item.key, item.value),
+            )
+    return [{"page": i.page, "key": i.key, "value": i.value} for i in items]
+
+
 # ── Admin: upload image field ────────────────────────────────────────────────
 
 SITE_IMAGES_DIR = db.DATA_DIR / "images" / "site"
@@ -142,23 +162,32 @@ async def upload_site_image(
 
     SITE_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Remove old file if exists
+    # Read old value before any mutation so we can clean up after a successful DB write.
     old_value = _get_value(page, key)
+
+    # 1. Write new file first (reversible if DB fails).
+    suffix = Path(file.filename or "image").suffix or ".jpg"
+    filename = f"site/{uuid.uuid4().hex}{suffix}"
+    new_path = db.DATA_DIR / "images" / filename
+    new_path.write_bytes(await file.read())
+
+    # 2. Update DB. On failure, remove the just-written file so disk and DB stay in sync.
+    try:
+        with db.get_conn() as conn:
+            conn.execute(
+                "INSERT INTO site_content (page, key, type, value) VALUES (?, ?, 'image', ?)"
+                " ON CONFLICT(page, key) DO UPDATE SET value = excluded.value",
+                (page, key, filename),
+            )
+    except Exception:
+        new_path.unlink(missing_ok=True)
+        raise
+
+    # 3. DB committed — now safe to remove the old file.
     if old_value:
         old_path = db.DATA_DIR / "images" / old_value
         if old_path.exists():
             old_path.unlink()
-
-    suffix = Path(file.filename or "image").suffix or ".jpg"
-    filename = f"site/{uuid.uuid4().hex}{suffix}"
-    (db.DATA_DIR / "images" / filename).write_bytes(await file.read())
-
-    with db.get_conn() as conn:
-        conn.execute(
-            "INSERT INTO site_content (page, key, type, value) VALUES (?, ?, 'image', ?)"
-            " ON CONFLICT(page, key) DO UPDATE SET value = excluded.value",
-            (page, key, filename),
-        )
 
     base = str(request.base_url).rstrip("/")
     return {"page": page, "key": key, "url": f"{base}/api/images/{filename}"}

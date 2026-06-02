@@ -5,7 +5,7 @@ import { useAdminMode } from "@/hooks/useAdminMode";
 // ── EditableText ──────────────────────────────────────────────────────────────
 // Wraps any block of content. When admin is logged in, shows a pencil button
 // on hover that opens a text/textarea edit modal.
-export function EditableText({ value, onSave, multiline = false, hint, children }) {
+export function EditableText({ value, onSave, multiline = false, hint, validate, children }) {
   const isAdmin = useAdminMode();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
@@ -21,6 +21,10 @@ export function EditableText({ value, onSave, multiline = false, hint, children 
   }
 
   async function handleSave() {
+    if (validate) {
+      const err = validate(draft);
+      if (err) { setError(err); return; }
+    }
     setSaving(true);
     try {
       await onSave(draft);

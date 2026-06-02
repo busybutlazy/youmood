@@ -116,6 +116,61 @@ async def test_upload_image_and_read_back():
 
 
 @pytest.mark.asyncio
+async def test_batch_update_requires_auth():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+        resp = await c.put(
+            "/api/admin/site-content/batch",
+            json=[{"page": "home", "key": "tagline", "value": "test"}],
+        )
+    assert resp.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_batch_update_saves_atomically():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+        token = await get_token(c)
+        resp = await c.put(
+            "/api/admin/site-content/batch",
+            json=[
+                {"page": "home", "key": "tagline", "value": "批次標題"},
+                {"page": "home", "key": "subtitle", "value": "批次副標"},
+            ],
+            headers=hdrs(token),
+        )
+        assert resp.status_code == 200
+        assert len(resp.json()) == 2
+
+        r1 = await c.get("/api/site-content/home/tagline")
+        r2 = await c.get("/api/site-content/home/subtitle")
+    assert r1.json()["value"] == "批次標題"
+    assert r2.json()["value"] == "批次副標"
+
+
+@pytest.mark.asyncio
+async def test_batch_update_rejects_unknown_key():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+        token = await get_token(c)
+        resp = await c.put(
+            "/api/admin/site-content/batch",
+            json=[{"page": "home", "key": "nonexistent", "value": "x"}],
+            headers=hdrs(token),
+        )
+    assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_batch_update_rejects_image_field():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+        token = await get_token(c)
+        resp = await c.put(
+            "/api/admin/site-content/batch",
+            json=[{"page": "home", "key": "hero_image", "value": "bad"}],
+            headers=hdrs(token),
+        )
+    assert resp.status_code == 400
+
+
+@pytest.mark.asyncio
 async def test_update_alembic_version():
     import sqlite3
     from app import db
