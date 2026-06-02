@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { usePageTitle } from "@/lib/usePageTitle";
 import { Mail, Instagram, Clock, MapPin } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import { contactInfo } from "@/data/marketing";
 
 export default function Contact() {
+  usePageTitle("聯絡我們");
   const { showToast } = useToast();
   const [form, setForm] = useState({ name: "", subject: "", message: "" });
   const [submitting, setSubmitting] = useState(false);

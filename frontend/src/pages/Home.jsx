@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { usePageTitle } from "@/lib/usePageTitle";
 import { Link } from "react-router-dom";
 import { Leaf, Hand, Sparkles, ArrowRight } from "lucide-react";
 import HeroCarousel from "@/components/HeroCarousel";
@@ -10,6 +11,7 @@ import { features, brandIntro } from "@/data/marketing";
 const featureIcons = { leaf: Leaf, hand: Hand, sparkles: Sparkles };
 
 export default function Home() {
+  usePageTitle(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 

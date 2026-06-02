@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { usePageTitle } from "@/lib/usePageTitle";
 import { useParams, useLocation, Link } from "react-router-dom";
 import { CheckCircle2 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
@@ -7,6 +8,7 @@ export default function OrderSuccess() {
   const { id } = useParams();
   const location = useLocation();
   // 摘要從結帳時送出的回傳資料取得（不再呼叫 API）
+  usePageTitle("訂單已送出");
   const [order] = useState(location.state?.order || null);
 
   // 直接刷新 / 無 state 時的保底顯示

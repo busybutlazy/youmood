@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { usePageTitle } from "@/lib/usePageTitle";
 import { PackageOpen, Search } from "lucide-react";
 import CategoryTabs from "@/components/CategoryTabs";
 import ProductCard from "@/components/ProductCard";
@@ -12,6 +13,7 @@ export default function Products() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  usePageTitle("全部商品");
   const [query, setQuery] = useState("");
 
   useEffect(() => {
