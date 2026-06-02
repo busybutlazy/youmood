@@ -193,3 +193,44 @@ async def test_product_list_includes_category_name():
         await c.post("/api/products", json={"name": "木盤", "price": 500.0, "category_id": cat_id}, headers=hdrs)
         resp = await c.get("/api/products")
     assert resp.json()[0]["category_name"] == "木製品"
+
+
+@pytest.mark.asyncio
+async def test_stock_defaults_to_null():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+        token = await get_token(c)
+        resp = await c.post(
+            "/api/products", json={"name": "木盤", "price": 500.0}, headers=auth_headers(token)
+        )
+    assert resp.json()["stock"] is None
+
+
+@pytest.mark.asyncio
+async def test_create_product_with_stock():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+        token = await get_token(c)
+        resp = await c.post(
+            "/api/products", json={"name": "木盤", "price": 500.0, "stock": 5}, headers=auth_headers(token)
+        )
+    assert resp.json()["stock"] == 5
+
+
+@pytest.mark.asyncio
+async def test_update_stock_to_zero():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+        token = await get_token(c)
+        hdrs = auth_headers(token)
+        prod_id = (await c.post("/api/products", json={"name": "木盤", "price": 500.0, "stock": 3}, headers=hdrs)).json()["id"]
+        resp = await c.patch(f"/api/products/{prod_id}", json={"stock": 0}, headers=hdrs)
+    assert resp.json()["stock"] == 0
+
+
+@pytest.mark.asyncio
+async def test_update_stock_to_null():
+    """Explicitly setting stock to null should clear it (stop tracking)."""
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+        token = await get_token(c)
+        hdrs = auth_headers(token)
+        prod_id = (await c.post("/api/products", json={"name": "木盤", "price": 500.0, "stock": 5}, headers=hdrs)).json()["id"]
+        resp = await c.patch(f"/api/products/{prod_id}", json={"stock": None}, headers=hdrs)
+    assert resp.json()["stock"] is None

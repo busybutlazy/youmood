@@ -17,3 +17,7 @@ export function createOrder(payload) {
     body: JSON.stringify(payload),
   });
 }
+
+export function getOrderPublic(id) {
+  return request(`/orders/${id}/public`);
+}

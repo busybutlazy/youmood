@@ -142,6 +142,32 @@ def get_order(order_id: int, _: str = Depends(get_current_admin)):
     return _build_order(order, items)
 
 
+@router.get("/{order_id}/public")
+def get_order_public(order_id: int):
+    """公開端點：客戶用訂單編號查詢狀態，不回傳個資。"""
+    with db.get_conn() as conn:
+        order = conn.execute(
+            "SELECT id, status, created_at FROM orders WHERE id = ?",
+            (order_id,),
+        ).fetchone()
+        if order is None:
+            raise HTTPException(status_code=404, detail="Order not found")
+        items = _fetch_items(conn, order_id)
+    return {
+        "id": order["id"],
+        "status": order["status"],
+        "created_at": order["created_at"],
+        "items": [
+            {
+                "product_name": it["product_name"],
+                "quantity": it["quantity"],
+                "unit_price": it["unit_price"],
+            }
+            for it in items
+        ],
+    }
+
+
 @router.patch("/{order_id}/status")
 def update_order_status(
     order_id: int,

@@ -10,6 +10,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Checkout from "./pages/Checkout";
 import OrderSuccess from "./pages/OrderSuccess";
+import OrderLookup from "./pages/OrderLookup";
 import NotFound from "./pages/NotFound";
 
 // Admin
@@ -36,6 +37,7 @@ export default function App() {
               <Route path="/contact" element={<Contact />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/order-success/:id" element={<OrderSuccess />} />
+              <Route path="/order-lookup" element={<OrderLookup />} />
             </Route>
 
             {/* Admin — no public Layout */}

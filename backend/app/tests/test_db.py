@@ -48,4 +48,4 @@ def test_alembic_version_recorded():
     with sqlite3.connect(db.DB_PATH) as conn:
         row = conn.execute("SELECT version_num FROM alembic_version").fetchone()
     assert row is not None
-    assert row[0] == "0001"
+    assert row[0] == "0002"
