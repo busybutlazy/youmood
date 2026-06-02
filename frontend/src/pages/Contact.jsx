@@ -3,12 +3,21 @@ import { usePageTitle } from "@/lib/usePageTitle";
 import { Mail, Instagram, Clock, MapPin } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import { contactInfo } from "@/data/marketing";
+import { EditableText } from "@/components/Editable";
+import { useSiteContent } from "@/hooks/useSiteContent";
 
 export default function Contact() {
   usePageTitle("聯絡我們");
   const { showToast } = useToast();
   const [form, setForm] = useState({ name: "", subject: "", message: "" });
   const [submitting, setSubmitting] = useState(false);
+
+  const { content, updateText } = useSiteContent("contact", {
+    email: contactInfo.email,
+    instagram: contactInfo.instagram,
+    hours: contactInfo.hours,
+    location: contactInfo.location,
+  });
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
@@ -24,10 +33,10 @@ export default function Contact() {
   };
 
   const items = [
-    { icon: Mail, label: "電子郵件", value: contactInfo.email },
-    { icon: Instagram, label: "Instagram", value: contactInfo.instagram },
-    { icon: Clock, label: "營業時間", value: contactInfo.hours },
-    { icon: MapPin, label: "工作室位置", value: contactInfo.location },
+    { icon: Mail, label: "電子郵件", field: "email", value: content.email },
+    { icon: Instagram, label: "Instagram", field: "instagram", value: content.instagram },
+    { icon: Clock, label: "營業時間", field: "hours", value: content.hours },
+    { icon: MapPin, label: "工作室位置", field: "location", value: content.location },
   ];
 
   return (
@@ -96,13 +105,18 @@ export default function Contact() {
                   <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-forest-light">
                     <it.icon className="h-4 w-4 text-forest" />
                   </span>
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs tracking-wider text-muted-foreground">
                       {it.label}
                     </p>
-                    <p className="text-sm font-medium text-foreground">
-                      {it.value}
-                    </p>
+                    <EditableText
+                      value={it.value}
+                      onSave={(v) => updateText(it.field, v)}
+                    >
+                      <p className="text-sm font-medium text-foreground">
+                        {it.value}
+                      </p>
+                    </EditableText>
                   </div>
                 </li>
               ))}

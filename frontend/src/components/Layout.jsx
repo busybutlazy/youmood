@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import CartDrawer from "./CartDrawer";
+import AdminBar from "./AdminBar";
 
 export default function Layout() {
   const [cartOpen, setCartOpen] = useState(false);
@@ -22,6 +23,7 @@ export default function Layout() {
       </main>
       <Footer />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+      <AdminBar />
     </div>
   );
 }

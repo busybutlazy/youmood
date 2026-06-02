@@ -22,6 +22,7 @@ import AdminProducts from "./admin/pages/Products";
 import ProductForm from "./admin/pages/ProductForm";
 import Categories from "./admin/pages/Categories";
 import Orders from "./admin/pages/Orders";
+import PageEditor from "./admin/pages/PageEditor";
 
 export default function App() {
   return (
@@ -58,6 +59,7 @@ export default function App() {
               <Route path="products/:id/edit" element={<ProductForm />} />
               <Route path="categories" element={<Categories />} />
               <Route path="orders" element={<Orders />} />
+              <Route path="pages" element={<PageEditor />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

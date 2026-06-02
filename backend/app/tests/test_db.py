@@ -6,7 +6,7 @@ os.environ.setdefault("DATA_DIR", "/tmp/test_youmood")
 
 from app import db
 
-TABLES = {"categories", "products", "product_images", "admin_users", "orders", "order_items"}
+TABLES = {"categories", "products", "product_images", "admin_users", "orders", "order_items", "site_content"}
 
 
 @pytest.fixture(autouse=True)
@@ -48,7 +48,7 @@ def test_alembic_version_recorded():
     with sqlite3.connect(db.DB_PATH) as conn:
         row = conn.execute("SELECT version_num FROM alembic_version").fetchone()
     assert row is not None
-    assert row[0] == "0002"
+    assert row[0] == "0003"
 
 
 def test_wal_mode_enabled():

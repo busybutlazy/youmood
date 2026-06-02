@@ -353,6 +353,57 @@ S（樂觀 2 天 / 現實 2 天）
 
 ---
 
+## P13: page-editor
+
+### 目標
+讓店主直接在前台頁面上編輯文字與圖片，不需要離開頁面。
+
+### 對應需求 / 前置 phase
+- 需求：首頁、關於我們、聯絡我們的文字與圖片可由後台即時修改
+- 前置：P7（後台已有 JWT 登入）
+
+### 範圍
+- `backend/alembic/versions/0003_add_site_content.py`：新增 `site_content` 表（page, key, type, value）
+- `backend/app/routes/site_content.py`：`GET /api/site-content/{page}/{key}`（公開）、`PUT /api/admin/site-content`（需 auth）、圖片上傳端點
+- `frontend/src/hooks/useAdminMode.js`：讀 localStorage JWT，回傳 `isAdmin: boolean`
+- `frontend/src/components/Editable.jsx`：`<EditableText>` / `<EditableImage>` 包裝元件，admin 才顯示編輯按鈕
+- `frontend/src/components/AdminBar.jsx`：頁面右下角浮動列，含「返回後台」按鈕，admin 才顯示
+- 套用至：`Home.jsx`、`About.jsx`、`Contact.jsx`（各自標記可編輯欄位）
+- `frontend/src/admin/pages/PageEditor.jsx`：後台「頁面管理」清單，連結到各前台路由
+- Admin sidebar 加入「頁面管理」項目
+
+### 可編輯欄位（初版）
+
+| 頁面 | 欄位 key | 類型 |
+|---|---|---|
+| home | hero_image | image |
+| home | tagline | text |
+| home | subtitle | text |
+| about | story | text |
+| about | photo | image |
+| contact | phone | text |
+| contact | address | text |
+| contact | email | text |
+| contact | hours | text |
+
+### 完成判準
+- Admin 登入後瀏覽前台，每個可編輯區塊右上角出現鉛筆圖示
+- 文字欄位：點鉛筆 → 輸入框 Modal → 儲存後立即更新
+- 圖片欄位：點鉛筆 → 上傳 → 儲存後立即更新
+- 未登入使用者看不到任何編輯按鈕
+- 前台頁面右下角有「返回後台」浮動按鈕（僅 admin 可見）
+- 未設定的欄位顯示 fallback 預設值（不顯示空白）
+- pytest 全綠
+
+### 風險
+- `useAdminMode` 讀 JWT 但不驗證 expiry → 改用與 `AuthContext` 共享狀態避免
+  - Mitigation: 直接讀現有 `AuthContext.isAuthenticated`，不另外讀 localStorage
+
+### 規模
+M（樂觀 3 天 / 現實 5 天）
+
+---
+
 ## Timeline
 
 | 樂觀 | 現實 |
