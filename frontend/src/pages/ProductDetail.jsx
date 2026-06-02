@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { usePageTitle } from "@/lib/usePageTitle";
 import { ChevronLeft, ShoppingBag, TreePine } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import QuantityStepper from "@/components/QuantityStepper";
@@ -36,6 +37,7 @@ export default function ProductDetail() {
     };
   }, [id]);
 
+  usePageTitle(product?.name ?? null);
   const soldOut = product?.stock === 0;
 
   const handleAdd = () => {

@@ -1,6 +1,8 @@
 import { aboutContent } from "@/data/marketing";
+import { usePageTitle } from "@/lib/usePageTitle";
 
 export default function About() {
+  usePageTitle("關於我們");
   const { hero, story, values, process } = aboutContent;
 
   return (

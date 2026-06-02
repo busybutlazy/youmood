@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { usePageTitle } from "@/lib/usePageTitle";
 import { useNavigate, Link } from "react-router-dom";
 import { Loader2, ChevronLeft } from "lucide-react";
 import { useCart } from "@/context/CartContext";
@@ -15,6 +16,7 @@ const EMPTY = {
 };
 
 export default function Checkout() {
+  usePageTitle("結帳");
   const { items, totalPrice, clearCart } = useCart();
   const navigate = useNavigate();
   const [form, setForm] = useState(EMPTY);

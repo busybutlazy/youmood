@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { usePageTitle } from "@/lib/usePageTitle";
 import { Search, Loader2, PackageSearch } from "lucide-react";
 import { getOrderPublic } from "@/api/orders";
 import { formatPrice } from "@/lib/utils";
@@ -20,6 +21,7 @@ const STATUS_COLOR = {
 };
 
 export default function OrderLookup() {
+  usePageTitle("查詢訂單");
   const [input, setInput] = useState("");
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
