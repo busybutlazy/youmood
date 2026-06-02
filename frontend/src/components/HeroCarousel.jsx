@@ -153,6 +153,7 @@ function SlideEditModal({ index, slide, onSave, onClose }) {
       await onSave({ ...draft, imageFile: imageFile ?? undefined });
     } catch {
       setError("儲存失敗，請稍後再試");
+    } finally {
       setSaving(false);
     }
   }

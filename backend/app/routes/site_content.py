@@ -79,21 +79,24 @@ def get_page_content(page: str, request: Request):
         raise HTTPException(status_code=404, detail="Page not found")
 
     base = str(request.base_url).rstrip("/")
-    result = {}
+
     with db.get_conn() as conn:
-        for key in keys:
-            row = conn.execute(
-                "SELECT value, type FROM site_content WHERE page = ? AND key = ?",
-                (page, key),
-            ).fetchone()
-            content_type = CONTENT_SCHEMA[(page, key)]
-            if row and row["value"]:
-                value = row["value"]
-                if content_type == "image":
-                    value = f"{base}/api/images/{value}"
-                result[key] = {"type": content_type, "value": value}
-            else:
-                result[key] = {"type": content_type, "value": None}
+        rows = conn.execute(
+            "SELECT key, value FROM site_content WHERE page = ?", (page,)
+        ).fetchall()
+
+    db_values = {row["key"]: row["value"] for row in rows if row["value"]}
+
+    result = {}
+    for key in keys:
+        content_type = CONTENT_SCHEMA[(page, key)]
+        value = db_values.get(key)
+        if value:
+            if content_type == "image":
+                value = f"{base}/api/images/{value}"
+            result[key] = {"type": content_type, "value": value}
+        else:
+            result[key] = {"type": content_type, "value": None}
 
     return result
 

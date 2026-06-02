@@ -1,13 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { fetchPageContent, saveText, saveTextBatch, uploadSiteImage } from "@/api/siteContent";
 
 export function useSiteContent(page, defaults) {
   const [content, setContent] = useState(defaults);
+  // Keep a ref so the effect always sees the latest defaults without
+  // re-running on every render (defaults is a new object reference each time).
+  const defaultsRef = useRef(defaults);
+  defaultsRef.current = defaults;
 
   useEffect(() => {
     fetchPageContent(page)
       .then((data) => {
-        const merged = { ...defaults };
+        const merged = { ...defaultsRef.current };
         for (const [key, field] of Object.entries(data)) {
           if (field.value !== null) merged[key] = field.value;
         }
