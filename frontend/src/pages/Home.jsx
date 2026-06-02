@@ -5,8 +5,10 @@ import { Leaf, Hand, Sparkles, ArrowRight } from "lucide-react";
 import HeroCarousel from "@/components/HeroCarousel";
 import ProductCard from "@/components/ProductCard";
 import SkeletonCard from "@/components/SkeletonCard";
+import { EditableText, EditableImage } from "@/components/Editable";
 import { getProducts } from "@/api/products";
 import { features, brandIntro } from "@/data/marketing";
+import { useSiteContent } from "@/hooks/useSiteContent";
 
 const featureIcons = { leaf: Leaf, hand: Hand, sparkles: Sparkles };
 
@@ -14,6 +16,12 @@ export default function Home() {
   usePageTitle(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const { content, updateText, updateImage } = useSiteContent("home", {
+    hero_image: brandIntro.image,
+    tagline: brandIntro.title,
+    subtitle: brandIntro.paragraphs.join("\n\n"),
+  });
 
   useEffect(() => {
     let active = true;
@@ -27,6 +35,8 @@ export default function Home() {
       active = false;
     };
   }, []);
+
+  const subtitleParagraphs = (content.subtitle || "").split("\n").filter(Boolean);
 
   return (
     <div>
@@ -70,25 +80,42 @@ export default function Home() {
       {/* 品牌介紹 */}
       <section className="bg-secondary/40">
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 py-20 lg:grid-cols-2 lg:px-8">
-          <div className="overflow-hidden rounded-lg">
-            <img
-              src={brandIntro.image}
-              alt={brandIntro.title}
-              className="aspect-[4/3] w-full object-cover"
-            />
-          </div>
+          <EditableImage onSave={(file) => updateImage("hero_image", file)}>
+            <div className="overflow-hidden rounded-lg">
+              <img
+                src={content.hero_image}
+                alt={content.tagline}
+                className="aspect-[4/3] w-full object-cover"
+              />
+            </div>
+          </EditableImage>
+
           <div>
             <p className="text-sm font-medium tracking-[0.2em] text-forest">
               {brandIntro.eyebrow}
             </p>
-            <h2 className="mt-3 text-3xl font-semibold md:text-4xl">
-              {brandIntro.title}
-            </h2>
-            <div className="mt-5 space-y-4 leading-relaxed text-muted-foreground">
-              {brandIntro.paragraphs.map((p, i) => (
-                <p key={i}>{p}</p>
-              ))}
-            </div>
+
+            <EditableText
+              value={content.tagline}
+              onSave={(v) => updateText("tagline", v)}
+            >
+              <h2 className="mt-3 text-3xl font-semibold md:text-4xl">
+                {content.tagline}
+              </h2>
+            </EditableText>
+
+            <EditableText
+              value={content.subtitle}
+              onSave={(v) => updateText("subtitle", v)}
+              multiline
+            >
+              <div className="mt-5 space-y-4 leading-relaxed text-muted-foreground">
+                {subtitleParagraphs.map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+              </div>
+            </EditableText>
+
             <Link
               to={brandIntro.cta.to}
               className="mt-7 inline-flex h-11 items-center justify-center rounded-md border border-wood/40 px-6 text-sm font-medium text-wood transition-colors hover:bg-wood hover:text-primary-foreground"

@@ -1,9 +1,18 @@
 import { aboutContent } from "@/data/marketing";
 import { usePageTitle } from "@/lib/usePageTitle";
+import { EditableText, EditableImage } from "@/components/Editable";
+import { useSiteContent } from "@/hooks/useSiteContent";
 
 export default function About() {
   usePageTitle("關於我們");
   const { hero, story, values, process } = aboutContent;
+
+  const { content, updateText, updateImage } = useSiteContent("about", {
+    story: story.paragraphs.join("\n\n"),
+    photo: story.image,
+  });
+
+  const storyParagraphs = (content.story || "").split("\n").filter(Boolean);
 
   return (
     <div>
@@ -26,19 +35,28 @@ export default function About() {
       <section className="mx-auto grid max-w-7xl items-center gap-12 px-6 py-20 lg:grid-cols-2 lg:px-8">
         <div>
           <h2 className="text-3xl font-semibold md:text-4xl">{story.title}</h2>
-          <div className="mt-6 space-y-4 leading-relaxed text-muted-foreground">
-            {story.paragraphs.map((p, i) => (
-              <p key={i}>{p}</p>
-            ))}
+          <EditableText
+            value={content.story}
+            onSave={(v) => updateText("story", v)}
+            multiline
+          >
+            <div className="mt-6 space-y-4 leading-relaxed text-muted-foreground">
+              {storyParagraphs.map((p, i) => (
+                <p key={i}>{p}</p>
+              ))}
+            </div>
+          </EditableText>
+        </div>
+
+        <EditableImage onSave={(file) => updateImage("photo", file)}>
+          <div className="overflow-hidden rounded-lg">
+            <img
+              src={content.photo}
+              alt={story.title}
+              className="aspect-[4/3] w-full object-cover"
+            />
           </div>
-        </div>
-        <div className="overflow-hidden rounded-lg">
-          <img
-            src={story.image}
-            alt={story.title}
-            className="aspect-[4/3] w-full object-cover"
-          />
-        </div>
+        </EditableImage>
       </section>
 
       {/* 我們的理念 */}
